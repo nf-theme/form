@@ -1,0 +1,15 @@
+{
+    "name": "nf/form",
+    "description": "Form builder",
+    "license": "MIT",
+    "authors": [{
+        "name": "Hieupv",
+        "email": "hieupv@codersvn.com"
+    }],
+    "autoload": {
+        "psr-4": {
+            "NightFury\\Form\\": "src/"
+        }
+    },
+    "require": {}
+}
