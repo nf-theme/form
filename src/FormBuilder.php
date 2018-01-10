@@ -3,13 +3,8 @@
 namespace NightFury\Form;
 
 use DateTime;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Contracts\Session\Session;
-use Illuminate\Contracts\View\Factory;
-use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\HtmlString;
 use NightFury\Form\HtmlBuilder;
 
@@ -21,13 +16,6 @@ class FormBuilder
      * @var \NightFury\Form\HtmlBuilder
      */
     protected $html;
-
-    /**
-     * The URL generator instance.
-     *
-     * @var \Illuminate\Contracts\Routing\UrlGenerator
-     */
-    protected $url;
 
     /**
      * An array of label names we've created.
@@ -68,9 +56,6 @@ class FormBuilder
      * Create a new form builder instance.
      *
      * @param  \NightFury\Form\HtmlBuilder               $html
-     * @param  \Illuminate\Contracts\Routing\UrlGenerator $url
-     * @param  \Illuminate\Contracts\View\Factory         $view
-     * @param  string                                     $csrfToken
      */
     public function __construct()
     {
@@ -764,10 +749,6 @@ class FormBuilder
     {
         $request = $this->request($name);
 
-        if (isset($this->session) && !$this->oldInputIsEmpty() && is_null($this->old($name)) && !$request) {
-            return false;
-        }
-
         if ($this->missingOldAndModel($name) && !$request) {
             return $checked;
         }
@@ -959,20 +940,6 @@ class FormBuilder
             return $old;
         }
 
-        if (function_exists('app')) {
-            $hasNullMiddleware = app("Illuminate\Contracts\Http\Kernel")
-                ->hasMiddleware(ConvertEmptyStringsToNull::class);
-
-            if ($hasNullMiddleware
-                && is_null($old)
-                && is_null($value)
-                && !is_null($this->view->shared('errors'))
-                && count($this->view->shared('errors')) > 0
-            ) {
-                return null;
-            }
-        }
-
         $request = $this->request($name);
         if (!is_null($request)) {
             return $request;
@@ -1028,27 +995,7 @@ class FormBuilder
      */
     public function old($name)
     {
-        if (isset($this->session)) {
-            $key     = $this->transformKey($name);
-            $payload = $this->session->getOldInput($key);
 
-            if (!is_array($payload)) {
-                return $payload;
-            }
-
-            if (!in_array($this->type, ['select', 'checkbox'])) {
-                if (!isset($this->payload[$key])) {
-                    $this->payload[$key] = collect($payload);
-                }
-
-                if (!empty($this->payload[$key])) {
-                    $value = $this->payload[$key]->shift();
-                    return $value;
-                }
-            }
-
-            return $payload;
-        }
     }
 
     /**
